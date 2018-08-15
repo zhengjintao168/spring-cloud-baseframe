@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../platform-common/platform-common.iml" filepath="$PROJECT_DIR$/../platform-common/platform-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/platform-eureka-register.iml" filepath="$PROJECT_DIR$/platform-eureka-register.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../platform-user-server/platform-user-server.iml" filepath="$PROJECT_DIR$/../platform-user-server/platform-user-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../platform-zuul-gateway/platform-zuul-gateway.iml" filepath="$PROJECT_DIR$/../platform-zuul-gateway/platform-zuul-gateway.iml" />
+    </modules>
+  </component>
+</project>

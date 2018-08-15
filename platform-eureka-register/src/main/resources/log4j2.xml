@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		<!-- log4j2使用说明：：
+        （1）private static final Logger logger = LogManager.getLogger(实际类名.class.getName());
+         (2) 配置说明
+              2.1 实际部署时候backupFilePatch变量需修改成linux目录
+              2.2 需要注意日志文件备份数和日志文件大小，注意预留目录空间
+             2.3 请根据实际情况配置各项参数
+        -->
+
+		<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+
+		<!-- %p：输出日志信息的优先级，即DEBUG，INFO，WARN，ERROR，FATAL。
+            %d：输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，如：%d{yyyy/MM/dd HH:mm:ss,SSS}。
+            %c：输出日志信息所属的类目，通常就是所在类的全名
+            %M：输出产生日志信息的方法名。
+            %L: 日志输出所在行数
+            %m: 日志内容
+            %F：输出日志消息产生时所在的文件名称
+            %l：输出日志事件的发生位置，相当于%c.%M(%F:%L)的组合，包括类全名、方法、文件名以及在代码中的行数。例如：test.TestLog4j.main(TestLog4j.java:10)。
+            %r：输出自应用程序启动到输出该log信息耗费的毫秒数。 %t：输出产生该日志事件的线程名。
+            %n：输出一个回车换行符，Windows平台为"rn"，Unix平台为"n"。 %x：输出和当前线程相关联的NDC(嵌套诊断环境)，尤其用到像javaservlets这样的多客户多线程的应用中。 %%：输出一个"%"字符。 -->
+
+		<!-- status : 这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部各种详细输出 monitorInterval
+            : Log4j能够自动检测修改配置文件和重新配置本身, 设置间隔秒数。monitorInterval="300" 每隔300秒重新读取配置文件，对web应用很实用 -->
+<configuration status="DEBUG">
+
+	<!-- 配置日志文件输出目录 -->
+	<Properties>
+		<Property name="fileName">eureka-register-server</Property>
+		<Property name="backupFilePatch">/Users/zjt/devtools/logFile</Property>
+	</Properties>
+
+	<!--先定义所有的appender -->
+	<appenders>
+
+		<!-- 控制台输出配置：控制台只输出DEBUG及以上级别的信息 -->
+		<Console name="Console" target="SYSTEM_OUT">
+			<ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+			<PatternLayout pattern="%d{yyyy.MM.dd HH:mm:ss.SSS} %p %c %M - %m%n" />
+		</Console>
+
+		<!-- 文件输出配置（临时测试用）：文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，这个也挺有用的，适合临时测试用 -->
+		<File name="File_Temp_Test" fileName="${backupFilePatch}/${fileName}_temp_test.log" append="false">
+			<ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY" />
+			<PatternLayout pattern="%d{yyyy.MM.dd HH:mm:ss.SSS} %p %c %M - %m%n" />
+		</File>
+
+		<!-- 输出所有消息（存储所有）：每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 (service.log.年份.gz) -->
+		<RollingFile name="all_log_appender" fileName="${backupFilePatch}/${fileName}.log"
+					 filePattern="${backupFilePatch}/${fileName}.log.%d{yyyy-MM-dd}.log.gz" immediateFlush="true">
+
+			<PatternLayout pattern="%d{yyyy.MM.dd HH:mm:ss.SSS} %p %c %M - %m%n" />
+
+			<!-- 日志文件大小 -->
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="50MB" />
+			</Policies>
+
+			<!-- 最多保留文件数 -->
+			<DefaultRolloverStrategy max="20" />
+
+		</RollingFile>
+
+	</appenders>
+
+	<!-- 然后定义logger，只有定义了logger并引入的appender，appender才会生效 ,异步 AsyncLogger 、asyncRoot -->
+	<loggers>
+
+		<!-- 根配置：指定控制台、临时文件输出、完整日志输出、debug日志输出 -->
+		<asyncRoot level="DEBUG" >
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="File_Temp_Test" />
+			<appender-ref ref="all_log_appender" />
+		</asyncRoot>
+
+		<!-- 过滤掉spring和mybatis等的一些系统无用的DEBUG信息,只输出error信息 -->
+		<AsyncLogger name="org.springframework" level="ERROR">
+		</AsyncLogger>
+
+		<AsyncLogger name="org.apache" level="ERROR">
+		</AsyncLogger>
+
+		<AsyncLogger name="com.netflix" level="ERROR">
+		</AsyncLogger>
+
+		<AsyncLogger name="com.sun" level="ERROR">
+		</AsyncLogger>
+
+	</loggers>
+
+</configuration>
